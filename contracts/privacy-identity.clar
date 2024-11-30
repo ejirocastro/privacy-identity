@@ -182,3 +182,36 @@
         ))
     )
 )
+
+;; read only functions
+
+;; Retrieves the user identity for the specified principal
+(define-read-only (get-user-identity (user-principal principal))
+    (map-get? user-identities user-principal)
+)
+
+;; Retrieves the details of a credential with the specified hash
+(define-read-only (get-credential-details (credential-hash (buff 32)))
+    (map-get? credential-details credential-hash)
+)
+
+;; Verifies a disclosure request with the specified identifier and submitted proof
+(define-read-only (verify-disclosure-request
+    (request-identifier (buff 32))
+    (submitted-proof (buff 32)))
+    (match (map-get? disclosure-requests request-identifier)
+        disclosure-info (and
+            (get disclosure-approved disclosure-info)
+            (validate-verification-proof submitted-proof (get verification-proof disclosure-info))
+        )
+        false
+    )
+)
+
+;; Checks the validity of a credential with the specified hash
+(define-read-only (check-credential-validity (credential-hash (buff 32)))
+    (match (map-get? credential-details credential-hash)
+        credential-info (check-credential-status credential-hash credential-info)
+        false
+    )
+)
