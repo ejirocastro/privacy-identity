@@ -216,6 +216,31 @@
     )
 )
 
+;; private functions
+
+;; Validates that the submitted verification proof matches the stored hash
+(define-private (validate-verification-proof 
+    (submitted-proof (buff 32)) 
+    (stored-hash (buff 32)))
+    (is-eq submitted-proof stored-hash)
+)
+
+;; Checks if a credential is still valid based on its expiration timestamp and revocation status
+(define-private (check-credential-status 
+    (credential-hash (buff 32))
+    (credential-info {
+        credential-issuer: principal, 
+        issuance-timestamp: uint, 
+        expiration-timestamp: uint, 
+        credential-category: (string-utf8 64), 
+        credential-revoked: bool
+    }))
+    (and
+        (< block-height (get expiration-timestamp credential-info))
+        (not (get credential-revoked credential-info))
+    )
+)
+
 ;; Validates that the timestamp is within the acceptable range
 (define-private (validate-timestamp (timestamp uint))
     (and 
