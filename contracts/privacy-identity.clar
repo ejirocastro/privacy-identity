@@ -215,3 +215,21 @@
         false
     )
 )
+
+;; Validates that the timestamp is within the acceptable range
+(define-private (validate-timestamp (timestamp uint))
+    (and 
+        (>= timestamp MIN-TIMESTAMP)
+        (<= timestamp MAX-TIMESTAMP)
+    )
+)
+
+;; Validates that the input buffer is exactly 32 bytes long
+(define-private (validate-buff32 (input (buff 32)))
+    (is-eq (len input) u32)
+)
+
+;; Validates that the input buffer is exactly 33 bytes long
+(define-private (validate-buff33 (input (buff 33)))
+    (is-eq (len input) u33)
+)
