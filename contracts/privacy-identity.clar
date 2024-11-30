@@ -146,3 +146,17 @@
         ))
     )
 )
+
+;; Revokes a user credential with the specified hash
+(define-public (revoke-user-credential (credential-hash (buff 32)))
+    (let
+        ((current-user tx-sender)
+         (credential-info (unwrap! (map-get? credential-details credential-hash) ERROR-UNAUTHORIZED-ACCESS)))
+        (asserts! (validate-buff32 credential-hash) ERROR-INVALID-INPUT)
+        (asserts! (is-eq (get credential-issuer credential-info) current-user) ERROR-UNAUTHORIZED-ACCESS)
+        (ok (map-set credential-details
+            credential-hash
+            (merge credential-info {credential-revoked: true})
+        ))
+    )
+)
