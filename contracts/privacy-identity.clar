@@ -160,3 +160,25 @@
         ))
     )
 )
+
+;; Updates the user's identity with a new identity hash and public key
+(define-public (update-user-identity 
+    (updated-identity-hash (buff 32)) 
+    (updated-public-key (buff 33)))
+    (let
+        ((current-user tx-sender)
+         (existing-identity (unwrap! (map-get? user-identities current-user) ERROR-IDENTITY-NOT-FOUND)))
+        (asserts! (validate-buff32 updated-identity-hash) ERROR-INVALID-INPUT)
+        (asserts! (validate-buff33 updated-public-key) ERROR-INVALID-INPUT)
+        (asserts! (not (get identity-revoked existing-identity)) ERROR-UNAUTHORIZED-ACCESS)
+        (ok (map-set user-identities
+            current-user
+            (merge existing-identity
+                {
+                    identity-hash: updated-identity-hash,
+                    user-public-key: updated-public-key
+                }
+            )
+        ))
+    )
+)
