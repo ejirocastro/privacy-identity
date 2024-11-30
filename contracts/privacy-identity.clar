@@ -13,3 +13,36 @@
 ;; Constants for validation
 (define-constant MIN-TIMESTAMP u1)
 (define-constant MAX-TIMESTAMP u9999999999)
+
+;; data maps
+(define-map user-identities
+    principal
+    {
+        identity-hash: (buff 32),
+        registration-timestamp: uint,
+        user-credentials: (list 10 (buff 32)),
+        user-public-key: (buff 33),
+        identity-revoked: bool
+    }
+)
+
+(define-map credential-details
+    (buff 32)  ;; credential hash
+    {
+        credential-issuer: principal,
+        issuance-timestamp: uint,
+        expiration-timestamp: uint,
+        credential-category: (string-utf8 64),
+        credential-revoked: bool
+    }
+)
+
+(define-map disclosure-requests
+    (buff 32)  ;; disclosure request ID
+    {
+        requesting-entity: principal,
+        requested-attributes: (list 5 (string-utf8 64)),
+        disclosure-approved: bool,
+        verification-proof: (buff 32)
+    }
+)
