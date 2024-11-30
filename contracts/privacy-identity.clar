@@ -70,3 +70,35 @@
         ))
     )
 )
+
+;; Adds a new credential for the user with the specified hash, expiration timestamp, and category
+(define-public (add-user-credential 
+    (credential-hash (buff 32))
+    (expiration-timestamp uint)
+    (credential-category (string-utf8 64)))
+    (let
+        ((current-user tx-sender)
+         (user-identity (unwrap! (map-get? user-identities current-user) ERROR-IDENTITY-NOT-FOUND)))
+        (asserts! (validate-buff32 credential-hash) ERROR-INVALID-INPUT)
+        (asserts! (validate-timestamp expiration-timestamp) ERROR-INVALID-INPUT)
+        (asserts! (> expiration-timestamp block-height) ERROR-CREDENTIAL-EXPIRED)
+        (asserts! (not (get identity-revoked user-identity)) ERROR-UNAUTHORIZED-ACCESS)
+        (map-set credential-details
+            credential-hash
+            {
+                credential-issuer: current-user,
+                issuance-timestamp: block-height,
+                expiration-timestamp: expiration-timestamp,
+                credential-category: credential-category,
+                credential-revoked: false
+            }
+        )
+        (ok (map-set user-identities
+            current-user
+            (merge user-identity
+                {user-credentials: (unwrap! (as-max-len? (append (get user-credentials user-identity) credential-hash) u10)
+                    ERROR-UNAUTHORIZED-ACCESS)}
+            )
+        ))
+    )
+)
