@@ -122,3 +122,27 @@
         ))
     )
 )
+
+;; Approves a disclosure request with the specified identifier and verification proof
+(define-public (approve-disclosure
+    (request-identifier (buff 32))
+    (verification-proof (buff 32)))
+    (let
+        ((current-user tx-sender)
+         (disclosure-request (unwrap! (map-get? disclosure-requests request-identifier) ERROR-UNAUTHORIZED-ACCESS))
+         (user-identity (unwrap! (map-get? user-identities current-user) ERROR-IDENTITY-NOT-FOUND)))
+        (asserts! (validate-buff32 request-identifier) ERROR-INVALID-INPUT)
+        (asserts! (validate-buff32 verification-proof) ERROR-INVALID-INPUT)
+        (asserts! (not (get identity-revoked user-identity)) ERROR-UNAUTHORIZED-ACCESS)
+        (asserts! (validate-verification-proof verification-proof (get identity-hash user-identity)) ERROR-INVALID-VERIFICATION-PROOF)
+        (ok (map-set disclosure-requests
+            request-identifier
+            (merge disclosure-request
+                {
+                    disclosure-approved: true,
+                    verification-proof: verification-proof
+                }
+            )
+        ))
+    )
+)
