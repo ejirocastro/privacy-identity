@@ -46,3 +46,27 @@
         verification-proof: (buff 32)
     }
 )
+
+;; public functions
+
+;; Registers a new user identity with the provided public key and identity hash
+(define-public (register-user-identity 
+    (user-public-key (buff 33)) 
+    (user-identity-hash (buff 32)))
+    (let
+        ((current-user tx-sender))
+        (asserts! (validate-buff33 user-public-key) ERROR-INVALID-INPUT)
+        (asserts! (validate-buff32 user-identity-hash) ERROR-INVALID-INPUT)
+        (asserts! (is-none (map-get? user-identities current-user)) ERROR-IDENTITY-EXISTS)
+        (ok (map-set user-identities
+            current-user
+            {
+                identity-hash: user-identity-hash,
+                registration-timestamp: block-height,
+                user-credentials: (list),
+                user-public-key: user-public-key,
+                identity-revoked: false
+            }
+        ))
+    )
+)
