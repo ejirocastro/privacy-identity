@@ -102,3 +102,23 @@
         ))
     )
 )
+
+;; Initiates a disclosure request with the specified identifier and required attributes
+(define-public (initiate-disclosure-request
+    (request-identifier (buff 32))
+    (required-attributes (list 5 (string-utf8 64))))
+    (let
+        ((requesting-user tx-sender))
+        (asserts! (validate-buff32 request-identifier) ERROR-INVALID-INPUT)
+        (asserts! (not (is-none (map-get? disclosure-requests request-identifier))) ERROR-INVALID-INPUT)
+        (ok (map-set disclosure-requests
+            request-identifier
+            {
+                requesting-entity: requesting-user,
+                requested-attributes: required-attributes,
+                disclosure-approved: false,
+                verification-proof: 0x00
+            }
+        ))
+    )
+)
